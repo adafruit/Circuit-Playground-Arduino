@@ -1,0 +1,111 @@
+
+EjectMedia V2.7.0.0 - ejects a media from a drive
+Freeware by Uwe Sieber - www.uwe-sieber.de
+
+
+Win32 version works Window 2000, XP and higher, including x64 editions.
+x64 version works under Windows x64 editions only.
+
+
+Before the ejection the volume is dismounted. This succeeds
+only if there are no open handles on the volume which can be
+something banal like an open Word document, a mounted TrueCrypt
+container or some kind of monitoring tool like a virus scanner.
+With parameter -t EjectMedia scans for TrueCrypt volumes hosted
+by the drive to eject and tries to release it. Since V2.7 this
+works with VeraCrypt too.
+
+Started with -f or when pressing the F key while in the try
+loop the dismount is forced which makes the open handles
+invalid.
+
+
+
+The 'eject' request is passed to 'Fixed' drives too. It depends
+on the drive's hardware if it is supported or not.
+It usually works with USB flash drives turned into 'fixed' drives.
+
+Some drive report a successful ejection but do nothing in fact.
+
+CD/DVD drives and some USB flash drives can bring back an ejected
+media by means of a 'load media' request:
+http://www.uwe-sieber.de/drivetools_e.html#loadmedia
+
+
+To prepare an external drive for 'safe removal' use my tool
+RemoveDrive:
+http://www.uwe-sieber.de/drivetools_e.html#removedrive
+
+
+Usage:
+EjectMedia DriveSpec: [-l] [-d] [-f] [-o] [-s] [-h] [-a] [-w:nnnn]
+
+DriveSpec: is the drive to remove, e.g. U: or a NTFS mountpoint like "C:\Mount\USB Drive1"
+           or a volume name like \\?\Volume{8108336c-7299-11de-ac31-000102b35cc3}
+           or . for the current drive
+           or \ for the drive of the EjectMedia.exe
+[-d]       dismount only (no eject)
+[-f]       force dismount
+[-o]       take volume offline
+[-f]       force eject (not much better than just to throw out the media)
+[-s]       self delete EjectDrive.exe when finished
+[-t]       release TrueCrypt volumes hosted by the drive to remove
+[-h]       show open handles (admin rights required, exprimental, may freeze!)
+[-L]       loop until success
+[-w:nnnn]  wait nnnn milliseconds before close
+
+Under XP by default admin rights are required. Since SP2 this can
+be changed by a policy:
+http://www.microsoft.com/technet/prodtechnol/windows2000serv/reskit/regentry/96271.mspx
+This reg file includes the required setting:
+http://www.uwe-sieber.de/files/allocatedasd_2.reg
+
+
+
+Returns Errorlevels:
+
+0 - successfully ejected a media
+1 - media not ejected/dismouted/taken offline
+2 - parameters are invalid
+3 - no media present
+4 - EjectMedia.exe located on the drive to remove -> temporary copy created and executed
+5 - EjectMedia.exe located on the drive to remove -> temporary copy failed
+
+
+
+About open handles
+
+EjectMedia does no use a driver for gaterhing handle information. Therefore
+when hitting the handle of a waiting object as a mutex then the function for
+getting the handle name does not return, the thread freezes and the EjectMedia
+process will not end until this waiting object stops waiting or is closed.
+Each handle request is done in its own thread, so the rest will keep going.
+
+If this happens then EjectMedia will
+- write the name of the process which hold this handle into the EjectMedia.ini
+  and never touch this process again
+- when supposed to end it hides its console window because the EjectMedia process
+  will not end
+
+
+
+
+Homepage:
+http://www.uwe-sieber.de/drivetools_e.html#ejectmedia
+
+
+
+Licence
+
+
+EjectMedia is Freeware.
+
+Allowed:
+- usage in any environment, including commercial
+- include in software products, including commercial
+- include on CD/DVD of computer magazines
+
+Not allowed:
+- changing any of the files
+- offer for download by means of a 'downloader' software
+
