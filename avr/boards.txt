@@ -1,0 +1,61 @@
+
+##############################################################
+# Adafruit Circuit Playground 32u4 w/Caterina Configuration
+circuitplay32u4.name=Adafruit Circuit Playground
+circuitplay32u4.bootloader.low_fuses=0xff
+circuitplay32u4.bootloader.high_fuses=0xd8
+circuitplay32u4.bootloader.extended_fuses=0xcb
+circuitplay32u4.bootloader.file=caterina/Caterina-Circuitplay32u4.hex
+circuitplay32u4.bootloader.unlock_bits=0x3F
+circuitplay32u4.bootloader.lock_bits=0x2F
+circuitplay32u4.bootloader.tool=arduino:avrdude
+circuitplay32u4.build.mcu=atmega32u4
+circuitplay32u4.build.f_cpu=8000000L
+circuitplay32u4.build.vid=0x239A
+circuitplay32u4.build.pid=0x8011
+circuitplay32u4.build.core=arduino:arduino
+circuitplay32u4.build.variant=circuitplay32u4
+circuitplay32u4.build.board=AVR_CIRCUITPLAY
+circuitplay32u4.build.usb_product="Circuit Playground"
+circuitplay32u4.build.usb_manufacturer="Adafruit"
+circuitplay32u4.build.extra_flags={build.usb_flags}
+circuitplay32u4.upload.protocol=avr109
+circuitplay32u4.upload.maximum_size=28672
+circuitplay32u4.upload.speed=57600
+circuitplay32u4.upload.disable_flushing=true
+circuitplay32u4.upload.use_1200bps_touch=true
+circuitplay32u4.upload.wait_for_upload_port=true
+circuitplay32u4.upload.tool=arduino:avrdude
+circuitplay32u4.vid.0=0x239A
+circuitplay32u4.pid.0=0x8011
+
+##############################################################
+# Adafruit Circuit Playground 32u4 w/Mass storage Configuration
+circuitplay32u4.name=Adafruit Circuit Playground (Mass)
+circuitplay32u4.bootloader.low_fuses=0xff
+circuitplay32u4.bootloader.high_fuses=0xd8
+circuitplay32u4.bootloader.extended_fuses=0xcb
+circuitplay32u4.bootloader.file=massstorage/MassStorage-Circuitplay32u4.hex
+circuitplay32u4.bootloader.unlock_bits=0x3F
+circuitplay32u4.bootloader.lock_bits=0x2F
+circuitplay32u4.bootloader.tool=arduino:avrdude
+circuitplay32u4.build.mcu=atmega32u4
+circuitplay32u4.build.f_cpu=8000000L
+circuitplay32u4.build.vid=0x239A
+circuitplay32u4.build.pid=0x8011
+circuitplay32u4.build.core=arduino:arduino
+circuitplay32u4.build.variant=circuitplay32u4
+circuitplay32u4.build.board=AVR_CIRCUITPLAY
+circuitplay32u4.build.usb_product="Circuit Playground"
+circuitplay32u4.build.usb_manufacturer="Adafruit"
+circuitplay32u4.build.extra_flags={build.usb_flags}
+circuitplay32u4.upload.protocol=avr109
+circuitplay32u4.upload.maximum_size=26623
+circuitplay32u4.upload.speed=57600
+circuitplay32u4.upload.disable_flushing=true
+circuitplay32u4.upload.use_1200bps_touch=true
+circuitplay32u4.upload.wait_for_upload_port=true
+circuitplay32u4.upload.tool=arduino:avrdude
+circuitplay32u4.vid.0=0x239A
+circuitplay32u4.pid.0=0x8011
+
