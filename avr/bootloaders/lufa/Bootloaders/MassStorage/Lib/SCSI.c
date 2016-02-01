@@ -38,6 +38,12 @@
 #define  INCLUDE_FROM_SCSI_C
 #include "SCSI.h"
 
+void uputc(char c) {
+  while ((UCSR1A & (1 << UDRE1)) == 0) {}; 
+
+  UDR1 = c;
+}
+
 /** Structure to hold the SCSI response data to a SCSI INQUIRY command. This gives information about the device's
  *  features and capabilities.
  */
@@ -65,7 +71,7 @@ static const SCSI_Inquiry_Response_t InquiryData =
 		.WideBus32Bit        = false,
 		.RelAddr             = false,
 
-		.VendorID            = "LUFA",
+		.VendorID            = "Adafruit",
 		.ProductID           = "Bootloader",
 		.RevisionID          = {'0','.','0','0'},
 	};
@@ -92,6 +98,8 @@ bool SCSI_DecodeSCSICommand(USB_ClassInfo_MS_Device_t* const MSInterfaceInfo)
 {
 	bool CommandSuccess = false;
 
+	//UDR1 = MSInterfaceInfo->State.CommandBlock.SCSICommandData[0];
+
 	/* Run the appropriate SCSI command hander function based on the passed command */
 	switch (MSInterfaceInfo->State.CommandBlock.SCSICommandData[0])
 	{
@@ -108,6 +116,7 @@ bool SCSI_DecodeSCSICommand(USB_ClassInfo_MS_Device_t* const MSInterfaceInfo)
 			CommandSuccess = SCSI_Command_ReadWrite_10(MSInterfaceInfo, DATA_WRITE);
 			break;
 		case SCSI_CMD_READ_10:
+		  uputc('R');
 			CommandSuccess = SCSI_Command_ReadWrite_10(MSInterfaceInfo, DATA_READ);
 			break;
 		case SCSI_CMD_MODE_SENSE_6:
@@ -250,6 +259,7 @@ static bool SCSI_Command_ReadWrite_10(USB_ClassInfo_MS_Device_t* const MSInterfa
 	/* Check if the block address is outside the maximum allowable value for the LUN */
 	if (BlockAddress >= LUN_MEDIA_BLOCKS)
 	{
+	  uputc('a');
 		/* Block address is invalid, update SENSE key and return command fail */
 		SCSI_SET_SENSE(SCSI_SENSE_KEY_ILLEGAL_REQUEST,
 		               SCSI_ASENSE_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE,
@@ -257,16 +267,21 @@ static bool SCSI_Command_ReadWrite_10(USB_ClassInfo_MS_Device_t* const MSInterfa
 
 		return false;
 	}
-
+	  uputc('A');
 	/* Determine if the packet is a READ (10) or WRITE (10) command, call appropriate function */
 	for (uint16_t i = 0; i < TotalBlocks; i++)
 	{
-		if (IsDataRead == DATA_READ)
+	  if (IsDataRead == DATA_READ) {
 		  VirtualFAT_ReadBlock(BlockAddress + i);
+	  uputc('r');
+	  uputc(BlockAddress + i);
+	  }
+
 		else
 		  VirtualFAT_WriteBlock(BlockAddress + i);
 	}
 
+uputc('!');
 	/* Update the bytes transferred counter and succeed the command */
 	MSInterfaceInfo->State.CommandBlock.DataTransferLength -= ((uint32_t)TotalBlocks * SECTOR_SIZE_BYTES);
 
