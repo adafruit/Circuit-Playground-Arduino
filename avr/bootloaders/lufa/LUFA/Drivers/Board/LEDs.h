@@ -160,6 +160,8 @@
 			#include "AVR8/MINIMUS/LEDs.h"
 		#elif (BOARD == BOARD_ADAFRUITU4)
 			#include "AVR8/ADAFRUITU4/LEDs.h"
+		#elif (BOARD == BOARD_CIRCUITPLAYGROUND32U4)
+			#include "AVR8/CIRCUITPLAYGROUND32U4/LEDs.h"
 		#elif (BOARD == BOARD_MICROSIN162)
 			#include "AVR8/MICROSIN162/LEDs.h"
 		#elif (BOARD == BOARD_SPARKFUN8U2)
@@ -207,8 +209,6 @@
 			#include "AVR8/YUN/LEDs.h"
 		#elif (BOARD == BOARD_MICRO)
 			#include "AVR8/MICRO/LEDs.h"
-		#elif (BOARD == BOARD_POLOLUMICRO)
-			#include "AVR8/POLOLUMICRO/LEDs.h"
 		#elif (BOARD == BOARD_XPLAINED_MINI)
 			#include "AVR8/XPLAINED_MINI/LEDs.h"
 		#else
