@@ -99,7 +99,11 @@ void Application_Jump_Check(void)
 
 		/* Disable pull-up after the check has completed */
 		PORTC &= ~(1 << 7);
-	#elif ((BOARD == BOARD_XPLAIN) || (BOARD == BOARD_XPLAIN_REV1))
+	#elif (BOARD == BOARD_CIRCUITPLAYGROUND32U4)
+		/* Check if left button is high (pressed) */
+		JumpToApplication = ! (PIND & (1 << 4));
+
+        #elif ((BOARD == BOARD_XPLAIN) || (BOARD == BOARD_XPLAIN_REV1))
 		/* Disable JTAG debugging */
 		JTAG_DISABLE();
 
@@ -149,7 +153,7 @@ void Application_Jump_Check(void)
 		MagicBootKey = 0;
 
 		// cppcheck-suppress constStatement
-		((void (*)(void))0x7000)();
+		((void (*)(void))0x0000)();
 	}
 }
 
