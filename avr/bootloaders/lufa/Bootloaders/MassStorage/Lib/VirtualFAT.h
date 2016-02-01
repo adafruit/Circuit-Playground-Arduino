@@ -41,10 +41,20 @@
 
 	/* Macros: */
 		/** Size of the virtual FLASH.BIN file in bytes. */
-		#define FLASH_FILE_SIZE_BYTES     (FLASHEND - (FLASHEND - BOOT_START_ADDR) - AUX_BOOT_SECTION_SIZE)
+		#define FLASH_FILE_SIZE_BYTES     (FLASHEND - (FLASHEND - BOOT_START_ADDR) - AUX_BOOT_SECTION_SIZE - README_FILE_SIZE_BYTES)
 
 		/** Size of the virtual EEPROM.BIN file in bytes. */
+#if (EEPROM_FILE == 1)
 		#define EEPROM_FILE_SIZE_BYTES    E2END
+#else
+		#define EEPROM_FILE_SIZE_BYTES    0
+#endif
+#if (README_FILE == 1)
+                /** Size of the read me file in bytes */
+                #define README_FILE_SIZE_BYTES    README_FILE_SIZE
+#else
+                #define README_FILE_SIZE_BYTES    0
+#endif
 
 		/** Number of sectors that comprise a single logical disk cluster. */
 		#define SECTOR_PER_CLUSTER        4
@@ -72,7 +82,7 @@
 		#define FILE_CLUSTERS(size)       ((size / CLUSTER_SIZE_BYTES) + ((size % CLUSTER_SIZE_BYTES) ? 1 : 0))
 
 		/** Total number of logical sectors/blocks on the disk. */
-		#define LUN_MEDIA_BLOCKS          (FILE_SECTORS(FLASH_FILE_SIZE_BYTES) + FILE_SECTORS(EEPROM_FILE_SIZE_BYTES) + 32)
+		#define LUN_MEDIA_BLOCKS          (FILE_SECTORS(FLASH_FILE_SIZE_BYTES) + FILE_SECTORS(EEPROM_FILE_SIZE_BYTES) + FILE_SECTORS(README_FILE_SIZE_BYTES) + 32 )
 
 		/** Converts a given time in HH:MM:SS format to a FAT filesystem time.
 		 *
@@ -164,10 +174,17 @@
 			DISK_FILE_ENTRY_FLASH_LFN     = 1,
 			/** Legacy MSDOS FAT file entry of the virtual FLASH.BIN image file. */
 			DISK_FILE_ENTRY_FLASH_MSDOS   = 2,
+#if (EEPROM_FILE == 1)
 			/** Long File Name FAT file entry of the virtual EEPROM.BIN image file. */
-			DISK_FILE_ENTRY_EEPROM_LFN    = 3,
+			DISK_FILE_ENTRY_EEPROM_LFN,
 			/** Legacy MSDOS FAT file entry of the virtual EEPROM.BIN image file. */
-			DISK_FILE_ENTRY_EEPROM_MSDOS  = 4,
+			DISK_FILE_ENTRY_EEPROM_MSDOS,
+#endif
+#if (README_FILE == 1) 
+			DISK_FILE_ENTRY_README_LFN    = 3,
+			DISK_FILE_ENTRY_README_MSDOS  = 4,
+#endif
+
 		};
 
 		/** Enum for the physical disk blocks of the virtual disk. */

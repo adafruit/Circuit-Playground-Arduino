@@ -67,7 +67,7 @@ static const FATBootBlock_t BootBlock =
 		.PhysicalDriveNum        = 0,
 		.ExtendedBootRecordSig   = 0x29,
 		.VolumeSerialNumber      = 0x12345678,
-		.VolumeLabel             = "LUFA BOOT  ",
+		.VolumeLabel             = "CircuitPlay",
 		.FilesystemIdentifier    = "FAT12   ",
 	};
 
@@ -82,7 +82,7 @@ static FATDirectoryEntry_t FirmwareFileEntries[] =
 		{
 			.MSDOS_Directory =
 				{
-					.Name            = "LUFA BOOT  ",
+					.Name            = "CircuitPlay",
 					.Attributes      = FAT_FLAG_VOLUME_NAME,
 					.Reserved        = {0},
 					.CreationTime    = 0,
@@ -138,6 +138,7 @@ static FATDirectoryEntry_t FirmwareFileEntries[] =
 				}
 		},
 
+#if (EEPROM_FILE == 1)
 		[DISK_FILE_ENTRY_EEPROM_LFN] =
 		{
 			.VFAT_LongFileName =
@@ -179,6 +180,50 @@ static FATDirectoryEntry_t FirmwareFileEntries[] =
 					.FileSizeBytes   = EEPROM_FILE_SIZE_BYTES,
 				}
 		},
+#endif
+#if (README_FILE == 1)
+		[DISK_FILE_ENTRY_README_LFN] =
+		{
+			.VFAT_LongFileName =
+				{
+					.Ordinal         = 1 | FAT_ORDINAL_LAST_ENTRY,
+					.Attribute       = FAT_FLAG_LONG_FILE_NAME,
+					.Reserved1       = 0,
+					.Reserved2       = 0,
+
+					.Checksum        = FAT_CHECKSUM('R','E','A','D','_','M','E',' ','T','X','T'),
+
+					.Unicode1        = 'R',
+					.Unicode2        = 'E',
+					.Unicode3        = 'A',
+					.Unicode4        = 'D',
+					.Unicode5        = '_',
+					.Unicode6        = 'M',
+					.Unicode7        = 'E',
+					.Unicode8        = '.',
+					.Unicode9        = 'T',
+					.Unicode10       = 'X',
+					.Unicode11       = 'T',
+					.Unicode12       = 0,
+					.Unicode13       = 0,
+				}
+		},
+
+		[DISK_FILE_ENTRY_README_MSDOS] =
+		{
+			.MSDOS_File =
+				{
+					.Filename        = "READ_ME ",
+					.Extension       = "TXT",
+					.Attributes      = FAT_FLAG_READONLY,
+					.Reserved        = {0},
+					.CreationTime    = FAT_TIME(1, 1, 0),
+					.CreationDate    = FAT_DATE(27, 10, 1990),
+					.StartingCluster = 2 + FILE_CLUSTERS(FLASH_FILE_SIZE_BYTES),
+					.FileSizeBytes   = README_FILE_SIZE_BYTES,
+				}
+		},
+#endif
 	};
 
 /** Starting cluster of the virtual FLASH.BIN file on disk, tracked so that the
@@ -193,7 +238,14 @@ static const uint16_t* FLASHFileStartCluster  = &FirmwareFileEntries[DISK_FILE_E
  *  systems files are usually replaced using the original file's disk clusters,
  *  while Linux appears to overwrite with an offset which must be compensated for.
  */
+#if (EEPROM_FILE == 1)
 static const uint16_t* EEPROMFileStartCluster = &FirmwareFileEntries[DISK_FILE_ENTRY_EEPROM_MSDOS].MSDOS_File.StartingCluster;
+#endif
+
+
+#if (README_FILE == 1)
+static const uint16_t* ReadMeFileStartCluster = &FirmwareFileEntries[DISK_FILE_ENTRY_README_MSDOS].MSDOS_File.StartingCluster;
+#endif
 
 /** Reads a byte of EEPROM out from the EEPROM memory space.
  *
@@ -208,11 +260,12 @@ static const uint16_t* EEPROMFileStartCluster = &FirmwareFileEntries[DISK_FILE_E
  *
  *  \return Read byte of EEPROM data.
  */
+#if (EEPROM_FILE == 1)
 static uint8_t ReadEEPROMByte(const uint8_t* const Address)
 {
 	return eeprom_read_byte(Address);
 }
-
+#endif
 /** Writes a byte of EEPROM out to the EEPROM memory space.
  *
  *  \note This function is required as the avr-libc EEPROM functions do not cope
@@ -225,12 +278,13 @@ static uint8_t ReadEEPROMByte(const uint8_t* const Address)
  *  \param[in]  Address   Address of the EEPROM location to write to
  *  \param[in]  Data      New data to write to the EEPROM location
  */
+#if (EEPROM_FILE == 1)
 static void WriteEEPROMByte(uint8_t* const Address,
                             const uint8_t Data)
 {
 	 eeprom_update_byte(Address, Data);
 }
-
+#endif
 /** Updates a FAT12 cluster entry in the FAT file table with the specified next
  *  chain index. If the cluster is the last in the file chain, the magic value
  *  \c 0xFFF should be used.
@@ -363,6 +417,7 @@ static void ReadWriteFLASHFileBlock(const uint16_t BlockNumber,
  *  \param[in]      Read         If \c true, the requested block is read, if
  *                               \c false, the requested block is written
  */
+#if (EEPROM_FILE == 1)
 static void ReadWriteEEPROMFileBlock(const uint16_t BlockNumber,
                                      uint8_t* BlockBuffer,
                                      const bool Read)
@@ -390,7 +445,7 @@ static void ReadWriteEEPROMFileBlock(const uint16_t BlockNumber,
 		  WriteEEPROMByte((uint8_t*)EEPROMAddress++, BlockBuffer[i]);
 	}
 }
-
+#endif
 /** Writes a block of data to the virtual FAT filesystem, from the USB Mass
  *  Storage interface.
  *
@@ -421,8 +476,9 @@ void VirtualFAT_WriteBlock(const uint16_t BlockNumber)
 
 		default:
 			ReadWriteFLASHFileBlock(BlockNumber, BlockBuffer, false);
+#if (EEPROM_FILE == 1)
 			ReadWriteEEPROMFileBlock(BlockNumber, BlockBuffer, false);
-
+#endif
 			break;
 	}
 }
@@ -460,8 +516,9 @@ void VirtualFAT_ReadBlock(const uint16_t BlockNumber)
 			UpdateFAT12ClusterChain(BlockBuffer, *FLASHFileStartCluster, FILE_CLUSTERS(FLASH_FILE_SIZE_BYTES));
 
 			/* Cluster 2+n onwards: Cluster chain of EEPROM.BIN */
+#if (EEPROM_FILE == 1)
 			UpdateFAT12ClusterChain(BlockBuffer, *EEPROMFileStartCluster, FILE_CLUSTERS(EEPROM_FILE_SIZE_BYTES));
-
+#endif
 			break;
 
 		case DISK_BLOCK_RootFilesBlock:
@@ -471,8 +528,9 @@ void VirtualFAT_ReadBlock(const uint16_t BlockNumber)
 
 		default:
 			ReadWriteFLASHFileBlock(BlockNumber, BlockBuffer, true);
+#if (EEPROM_FILE == 1)
 			ReadWriteEEPROMFileBlock(BlockNumber, BlockBuffer, true);
-
+#endif
 			break;
 	}
 

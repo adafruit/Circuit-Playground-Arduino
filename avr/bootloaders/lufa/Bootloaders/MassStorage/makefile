@@ -18,9 +18,9 @@ F_CPU        = 8000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
 TARGET       = BootloaderMassStorage
-SRC          = $(TARGET).c Descriptors.c BootloaderAPI.c BootloaderAPITable.S Lib/SCSI.c Lib/VirtualFAT.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
+SRC          = $(TARGET).c ReadMe.c Descriptors.c BootloaderAPI.c BootloaderAPITable.S Lib/SCSI.c Lib/VirtualFAT.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 LUFA_PATH    = ../../LUFA
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -DBOOT_START_ADDR=$(BOOT_START_OFFSET)
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -DBOOT_START_ADDR=$(BOOT_START_OFFSET) -DEEPROM_FILE=$(EEPROM_FILE) -DREADME_FILE=$(README_FILE) -DREADME_FILE_SIZE=$(README_FILE_SIZE)
 LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET) $(BOOT_API_LD_FLAGS)
 
 # Flash size and bootloader section sizes of the target, in KB. These must
@@ -28,6 +28,13 @@ LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET) $(BOOT_API_LD_FLAG
 # device's fuses.
 FLASH_SIZE_KB         = 32
 BOOT_SECTION_SIZE_KB  = 4
+
+# Set to 1 if you want to include EEPROM read/write support
+EEPROM_FILE           = 0
+
+# Set to 1 if you want to include a README file
+README_FILE           = 1
+README_FILE_SIZE      = 128
 
 # Bootloader address calculation formulas
 # Do not modify these macros, but rather modify the dependent values above.
@@ -53,6 +60,7 @@ else
   CC_FLAGS           += -DAUX_BOOT_SECTION_SIZE='($(AUX_BOOT_SECTION_SIZE_KB) * 1024)'
   LD_FLAGS           += -Wl,--section-start=.boot_aux=$(call BOOT_SEC_OFFSET, (($(BOOT_SECTION_SIZE_KB) + $(AUX_BOOT_SECTION_SIZE_KB)) * 1024 - 16))
   LD_FLAGS           += $(call BOOT_SECTION_LD_FLAG, .boot_aux_trampoline, Boot_AUX_Trampoline, ($(BOOT_SECTION_SIZE_KB) + $(AUX_BOOT_SECTION_SIZE_KB)) * 1024)
+  LD_FLAGS           += -Wl,--section-start=.readme=0x6780
 endif
 
 # Default target

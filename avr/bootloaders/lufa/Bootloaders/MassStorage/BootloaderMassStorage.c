@@ -36,6 +36,13 @@
 #define  INCLUDE_FROM_BOOTLOADER_MASSSTORAGE_C
 #include "BootloaderMassStorage.h"
 
+#if README_FILE == 1
+#define README_FILE_SECTION __attribute__((section(".readme")))
+
+README_FILE_SECTION static const char readme[README_FILE_SIZE]  = "abcdefghijklmnopqrstuvwxyz";
+#endif
+
+
 /** LUFA Mass Storage Class driver interface configuration and state information. This structure is
  *  passed to all Mass Storage Class driver functions, so that multiple instances of the same class
  *  within a device can be differentiated from one another.
@@ -199,9 +206,17 @@ static void SetupHardware(void)
 	MCUCR = (1 << IVCE);
 	MCUCR = (1 << IVSEL);
 
+	/* turn on debug via UART */
+	UCSR1A = 1 << U2X1;
+	uint16_t baud_setting = (F_CPU / 4 / 115200 - 1) / 2;
+	UBRR1H = baud_setting >> 8;
+	UBRR1L = baud_setting;
+	UCSR1B |= (1 << RXEN1) | (1 << TXEN1);
+	UDR1 = 'U';
+
 	/* Hardware Initialization */
 	LEDs_Init();
-	USB_Init();
+	USB_Init();	
 
 	/* Bootloader active LED toggle timer initialization */
 	TIMSK1 = (1 << TOIE1);
@@ -210,7 +225,8 @@ static void SetupHardware(void)
 	TCCR4B = (1<<CS40); // 1 divider for clock
 	//TCCR4D = 0; // fast PWM mode
 	OCR4C = 0xFF;
-	//OCR4A = 0;
+	OCR4A = pgm_read_byte(readme);
+	OCR4A = 0;
 }
 
 /** ISR to periodically toggle the LEDs on the board to indicate that the bootloader is active. */
